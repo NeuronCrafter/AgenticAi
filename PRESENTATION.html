@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Training</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --accent: #34a853;
+    --warn: #fbbc04;
+    --danger: #ea4335;
+    --dark: #1e2640;
+    --darker: #141929;
+    --card: #252d45;
+    --text: #e8eaf6;
+    --muted: #9aa5c4;
+    --code-bg: #0d1117;
+    --code-text: #c9d1d9;
+    --green: #56d364;
+    --blue: #79c0ff;
+    --orange: #ffa657;
+    --purple: #bc8cff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--darker);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Slide container ── */
+  .slides { width: 100%; height: 100vh; position: relative; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    padding: 48px 64px 100px;
+    background: var(--darker);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* ── Slide header ── */
+  .slide-number {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .section-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .badge-fundamentals { background: #1a73e830; color: #79c0ff; border: 1px solid #1a73e860; }
+  .badge-genai       { background: #34a85330; color: #56d364; border: 1px solid #34a85360; }
+  .badge-memory      { background: #9c27b030; color: #bc8cff; border: 1px solid #9c27b060; }
+  .badge-langchain   { background: #ff980030; color: #ffa657; border: 1px solid #ff980060; }
+  .badge-tools       { background: #e5393530; color: #ff7b72; border: 1px solid #e5393560; }
+  .badge-hitl        { background: #fbbc0430; color: #f9c74f; border: 1px solid #fbbc0460; }
+  .badge-multiagent  { background: #00bcd430; color: #7ee787; border: 1px solid #00bcd460; }
+  .badge-rag         { background: #7b1fa230; color: #d2a8ff; border: 1px solid #7b1fa260; }
+
+  h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 8px;
+    padding-bottom: 0.15em;
+    background: linear-gradient(135deg, #fff 0%, #9aa5c4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  h2 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #ffffff;
+  }
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--blue);
+    margin-bottom: 10px;
+  }
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--muted);
+    margin-bottom: 32px;
+  }
+
+  /* ── Layout helpers ── */
+  .cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; min-height: 0; }
+  .cols-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; min-height: 0; }
+  .flex-row { display: flex; gap: 24px; align-items: flex-start; }
+  .flex-col { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+
+  /* Fills remaining slide height only when it is the last content block (no tip/footer after it) */
+  /* Grid and flex children can shrink below their content size */
+  .cols-2 > *, .cols-3 > * { min-height: 0; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card);
+    border: 1px solid #3a425c;
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .card-accent-blue  { border-top: 3px solid var(--primary); }
+  .card-accent-green { border-top: 3px solid var(--accent); }
+  .card-accent-warn  { border-top: 3px solid var(--warn); }
+  .card-accent-red   { border-top: 3px solid var(--danger); }
+  .card-accent-purple{ border-top: 3px solid #9c27b0; }
+
+  /* ── List styles ── */
+  ul, ol { padding-left: 20px; }
+  li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  li strong { color: #fff; }
+  .big-list li { font-size: 1.15rem; margin-bottom: 8px; }
+  .check-list { list-style: none; padding: 0; }
+  .check-list li::before { content: "✓ "; color: var(--accent); font-weight: 700; }
+
+  /* ── Code blocks ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--code-text);
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100vh - 260px);
+  }
+  /* Subtle scrollbars on code blocks */
+  pre::-webkit-scrollbar { height: 5px; width: 5px; }
+  pre::-webkit-scrollbar-track { background: transparent; }
+  pre::-webkit-scrollbar-thumb { background: #3a425c; border-radius: 3px; }
+  .kw  { color: #ff7b72; }   /* keywords */
+  .fn  { color: #d2a8ff; }   /* functions */
+  .str { color: #a5d6ff; }   /* strings */
+  .cm  { color: #8b949e; font-style: italic; } /* comments */
+  .num { color: #79c0ff; }   /* numbers */
+  .cls { color: #ffa657; }   /* class names */
+
+  /* ── Comparison tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-top: 8px;
+  }
+  th {
+    background: var(--card);
+    color: var(--blue);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 2px solid #3a425c;
+    font-weight: 600;
+  }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #2e3550;
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #2a3252; }
+
+  /* ── Arrows & flow diagrams ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+  }
+  .flow-box {
+    background: var(--card);
+    border: 1px solid #3a425c;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .flow-arrow { color: var(--muted); font-size: 1.4rem; }
+  .flow-box.highlight { background: #1a73e820; border-color: var(--primary); color: var(--blue); }
+  .flow-box.green     { background: #34a85320; border-color: var(--accent); color: var(--green); }
+  .flow-box.orange    { background: #ff980020; border-color: #ff9800; color: var(--orange); }
+  .flow-box.red       { background: #ea433520; border-color: var(--danger); color: #ff7b72; }
+  .flow-box.purple    { background: #9c27b020; border-color: #9c27b0; color: var(--purple); }
+
+  /* ── Big numbers ── */
+  .stat-row { display: flex; gap: 24px; margin: 16px 0; }
+  .stat {
+    flex: 1;
+    text-align: center;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 20px 12px;
+    border: 1px solid #3a425c;
+  }
+  .stat-number { font-size: 2.2rem; font-weight: 700; color: var(--blue); }
+  .stat-label  { font-size: 0.85rem; color: var(--muted); margin-top: 4px; }
+
+  /* ── Tag pills ── */
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin: 2px;
+  }
+  .pill-blue   { background: #1a73e830; color: var(--blue); border: 1px solid #1a73e860; }
+  .pill-green  { background: #34a85330; color: var(--green); border: 1px solid #34a85360; }
+  .pill-orange { background: #ff980030; color: var(--orange); border: 1px solid #ff980060; }
+
+  /* ── Title slide special ── */
+  .title-slide {
+    justify-content: center;
+    align-items: stretch;
+    background: radial-gradient(ellipse at 80% 50%, #1a73e815 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, #34a85310 0%, transparent 50%),
+                var(--darker);
+  }
+  .title-slide h1 { font-size: 3.5rem; margin-bottom: 16px; }
+  .title-accent {
+    width: 60px; height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+  .agenda-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #2e3550;
+    font-size: 1rem;
+  }
+  .agenda-num {
+    width: 28px; height: 28px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: #1e2640dd;
+    backdrop-filter: blur(8px);
+    border: 1px solid #3a425c;
+    border-radius: 32px;
+    padding: 10px 20px;
+    z-index: 100;
+  }
+  .nav button {
+    background: var(--card);
+    border: 1px solid #3a425c;
+    color: var(--text);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .nav button:hover { background: var(--primary); border-color: var(--primary); }
+  .nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .nav-progress {
+    font-size: 0.85rem;
+    color: var(--muted);
+    min-width: 60px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Progress bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.3s ease;
+    z-index: 200;
+  }
+
+  /* ── Icon boxes ── */
+  .icon-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    background: var(--card);
+    border-radius: 10px;
+    border: 1px solid #3a425c;
+  }
+  .icon { font-size: 1.6rem; flex-shrink: 0; }
+  .icon-text h4 { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  .icon-text p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: #2e3550; margin: 16px 0; }
+
+  /* ── Warning/tip boxes ── */
+  .tip {
+    background: #34a85315;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    color: var(--green);
+    margin-top: 12px;
+  }
+  .warn-box {
+    background: #fbbc0415;
+    border-left: 3px solid var(--warn);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    color: #f9c74f;
+    margin-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="slides" id="slides">
+
+<!-- ═══════════════════════════ SLIDE 1 — Title ═══════════════════════════ -->
+<div class="slide title-slide active" id="slide-1">
+  <div class="slide-number">1 / 22</div>
+  <div style="width:100%; display:flex; gap:40px; align-items:stretch;">
+
+    <!-- ── LEFT: title + agenda + info ── -->
+    <div style="flex:1; min-width:0;">
+      <div class="title-accent"></div>
+      <h1>Agentic AI</h1>
+      <h1 style="font-size:2.2rem; margin-top:0;">Hands-on Workshop</h1>
+      <p class="subtitle" style="margin-top:12px; font-size:1.1rem;">From "LLMs that answer" to "AI that acts"</p>
+
+      <div style="margin-top:24px;">
+        <div class="agenda-item"><div class="agenda-num">1</div>Fundamentals of AI &amp; LLMs</div>
+        <div class="agenda-item"><div class="agenda-num">2</div>GenAI vs Agentic AI</div>
+        <div class="agenda-item"><div class="agenda-num">3</div>Memory in LLM</div>
+        <div class="agenda-item"><div class="agenda-num">4</div>LangChain &amp; LangGraph</div>
+        <div class="agenda-item"><div class="agenda-num">5</div>Tool / Function Calls</div>
+        <div class="agenda-item"><div class="agenda-num">6</div>Human-in-the-Loop</div>
+        <div class="agenda-item"><div class="agenda-num">7</div>Single vs Multi-Agent Systems</div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:0.82rem; color:var(--muted);">Presenter</div>
+          <div style="font-size:1rem; font-weight:600; color:var(--green);">Navin</div>
+        </div>
+        <div style="width:1px; height:28px; background:#3a425c;"></div>
+        <div>
+          <div style="font-size:0.82rem; color:var(--muted);">Frameworks</div>
+          <div style="font-size:1rem; font-weight:600; color:var(--orange);">LangChain · LangGraph</div>
+        </div>
+        <div style="width:1px; height:28px; background:#3a425c;"></div>
+        <div>
+          <div style="font-size:0.82rem; color:var(--muted);">Model</div>
+          <div style="font-size:1rem; font-weight:600; color:var(--blue);">Gemini Flash</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: agent loop visual ── -->
+    <div style="flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+
+      <div style="font-size:0.7rem; color:var(--muted); letter-spacing:0.14em; font-weight:600; text-transform:uppercase; text-align:center;">How an AI Agent Works</div>
+
+      <!-- User -->
+      <div style="background:var(--card); border:1px solid #3a425c; border-radius:10px; padding:10px 28px; text-align:center;">
+        <div style="font-size:1.1rem;">👤</div>
+        <div style="font-size:0.72rem; color:var(--muted); font-weight:600; margin-top:3px;">User Request</div>
+      </div>
+
+      <div style="color:#3a425c; font-size:1.1rem; line-height:1;">▼</div>
+
+      <!-- LLM + Memory row -->
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="background:linear-gradient(135deg,#bc8cff15,#bc8cff35); border:1.5px solid var(--purple); border-radius:10px; padding:10px 14px; text-align:center;">
+          <div style="font-size:1rem;">💾</div>
+          <div style="font-size:0.66rem; color:var(--purple); font-weight:700; margin-top:3px;">Memory</div>
+        </div>
+        <div style="color:var(--muted); font-size:0.9rem;">⇄</div>
+        <div style="background:linear-gradient(135deg,#1a73e820,#1a73e845); border:2px solid var(--primary); border-radius:12px; padding:14px 20px; text-align:center;">
+          <div style="font-size:1.5rem;">🧠</div>
+          <div style="font-size:0.78rem; color:var(--blue); font-weight:700; margin-top:3px;">LLM</div>
+          <div style="font-size:0.63rem; color:var(--muted);">Reason · Plan</div>
+        </div>
+        <div style="color:var(--orange); font-size:0.9rem;">→</div>
+        <div style="background:linear-gradient(135deg,#ffa65715,#ffa65735); border:1.5px solid var(--orange); border-radius:10px; padding:10px 14px; text-align:center;">
+          <div style="font-size:1rem;">🔧</div>
+          <div style="font-size:0.66rem; color:var(--orange); font-weight:700; margin-top:3px;">Tools</div>
+        </div>
+      </div>
+
+      <div style="font-size:0.66rem; color:#4a5470; font-style:italic;">← observe result · loop until done</div>
+
+      <div style="color:#3a425c; font-size:1.1rem; line-height:1;">▼</div>
+
+      <!-- Final answer -->
+      <div style="background:linear-gradient(135deg,#34a85320,#34a85345); border:1.5px solid var(--accent); border-radius:10px; padding:10px 28px; text-align:center;">
+        <div style="font-size:1.1rem;">✅</div>
+        <div style="font-size:0.72rem; color:var(--green); font-weight:700; margin-top:3px;">Final Answer</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 2 — What is an LLM ═══════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-number">2 / 22</div>
+  <div class="section-badge badge-fundamentals">Fundamentals</div>
+  <h2>What is an LLM?</h2>
+  <div class="cols-2" style="gap:28px;">
+    <div>
+      <div class="flow" style="margin-bottom:20px;">
+        <div class="flow-box">Data</div>
+        <div class="flow-arrow">+</div>
+        <div class="flow-box">Neural Network</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box highlight">LLM</div>
+      </div>
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom: 20px;">A <strong style="color:#fff;">Large Language Model</strong> is a deep-learning model trained on billions of text samples to predict the next token. It learns patterns, grammar, facts, and reasoning from text.</p>
+
+      <table>
+        <tr><th>Concept</th><th>Meaning</th></tr>
+        <tr><td><strong>Token</strong></td><td>A piece of a word (~4 chars)</td></tr>
+        <tr><td><strong>Context Window</strong></td><td>How much text the LLM can "see"</td></tr>
+        <tr><td><strong>Prompt</strong></td><td>Input sent to the model</td></tr>
+        <tr><td><strong>Temperature</strong></td><td>0 = precise, 1 = creative</td></tr>
+        <tr><td><strong>Inference</strong></td><td>Calling the model to get output</td></tr>
+      </table>
+    </div>
+    <div class="flex-col">
+      <pre><span class="cm"># LLM call (main.py)</span>
+<span class="kw">from</span> langchain_google_genai <span class="kw">import</span> <span class="cls">ChatGoogleGenerativeAI</span>
+<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+
+load_dotenv()  <span class="cm"># reads GOOGLE_API_KEY from .env</span>
+
+<span class="cm"># 1. Create model instance</span>
+model = <span class="cls">ChatGoogleGenerativeAI</span>(
+    model=<span class="str">"gemini-3.1-flash-lite"</span>
+)
+
+<span class="cm"># 2. Send a prompt → get a response</span>
+response = model.<span class="fn">invoke</span>(<span class="str">"What is the capital of India?"</span>)
+
+<span class="cm"># 3. Read the text</span>
+<span class="fn">print</span>(response.text)  <span class="cm"># → "New Delhi"</span></pre>
+      <div class="tip">💡 Remember: the model doesn't actually "know" things. It <strong>predicts</strong> the next word based on patterns from training data.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 3 — Messages & Roles ═══════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-number">3 / 22</div>
+  <div class="section-badge badge-fundamentals">Fundamentals</div>
+  <h2>Messages & Roles</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:20px;">Every LLM conversation uses <strong style="color:#fff;">three roles</strong>. Understanding these is essential for everything that follows.</p>
+      <div class="flex-col">
+        <div class="icon-box">
+          <div class="icon">⚙️</div>
+          <div class="icon-text">
+            <h4>SystemMessage</h4>
+            <p>Sets the AI's personality, rules, and behaviour. Written by the developer. Processed first.</p>
+          </div>
+        </div>
+        <div class="icon-box">
+          <div class="icon">🧑</div>
+          <div class="icon-text">
+            <h4>HumanMessage</h4>
+            <p>The user's question or input. What the person types.</p>
+          </div>
+        </div>
+        <div class="icon-box">
+          <div class="icon">🤖</div>
+          <div class="icon-text">
+            <h4>AIMessage</h4>
+            <p>The model's reply. Stored in history so the model remembers what it said.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre><span class="kw">from</span> langchain_core.messages <span class="kw">import</span> (
+    <span class="cls">SystemMessage</span>,
+    <span class="cls">HumanMessage</span>,
+    <span class="cls">AIMessage</span>
+)
+
+<span class="cm"># A conversation is just a list of messages</span>
+conversation = [
+    <span class="cm"># Role: System (developer sets this)</span>
+    <span class="cls">SystemMessage</span>(content=<span class="str">"You are a Python expert."</span>),
+
+    <span class="cm"># Role: Human (user's input)</span>
+    <span class="cls">HumanMessage</span>(content=<span class="str">"What is a list comprehension?"</span>),
+
+    <span class="cm"># Role: AI (model's previous reply)</span>
+    <span class="cls">AIMessage</span>(content=<span class="str">"A list comprehension is..."</span>),
+
+    <span class="cm"># Role: Human (follow-up question)</span>
+    <span class="cls">HumanMessage</span>(content=<span class="str">"Give me an example."</span>)
+]
+
+<span class="cm"># Send the whole list — model sees full context</span>
+response = model.<span class="fn">invoke</span>(conversation)</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 4 — GenAI vs Agentic AI ═══════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-number">4 / 22</div>
+  <div class="section-badge badge-genai">GenAI vs Agentic AI</div>
+  <h2>GenAI vs Agentic AI</h2>
+  <div class="cols-2">
+    <div class="card card-accent-blue">
+      <h3 style="color:var(--blue);">🗣️ Generative AI</h3>
+      <p style="color:var(--muted); font-size:0.88rem; margin-bottom:12px;">A single, stateless request → response cycle. The model answers but cannot act.</p>
+      <div class="flow" style="margin-bottom:12px;">
+        <div class="flow-box">User Prompt</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box highlight">LLM</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Text Response</div>
+      </div>
+      <ul style="font-size:0.88rem;">
+        <li>❌ No memory between sessions</li>
+        <li>❌ Cannot take real-world actions</li>
+        <li>❌ Cannot call APIs or run code</li>
+        <li>✅ Fast, simple, low cost</li>
+      </ul>
+      <div class="tip" style="margin-top:10px; font-size:0.82rem;">Example: "Write me a poem about Bangalore"</div>
+    </div>
+    <div class="card card-accent-green">
+      <h3 style="color:var(--green);">🤖 Agentic AI</h3>
+      <p style="color:var(--muted); font-size:0.88rem; margin-bottom:12px;">The LLM <strong style="color:#fff;">reasons, plans, and executes</strong> multi-step tasks using tools. It loops until done.</p>
+      <div class="flow" style="flex-direction:column; align-items:flex-start; gap:6px; font-size:0.82rem;">
+        <div class="flow-box green">1. User: "Email me a weather report for Bangalore"</div>
+        <div style="padding-left:16px; color:var(--muted);">↓ Think: "I need to 1) get weather, 2) write email, 3) send"</div>
+        <div class="flow-box orange">2. Call Tool: get_weather("Bangalore") → 28°C Cloudy</div>
+        <div class="flow-box orange">3. Call Tool: write_email(weather_data) → HTML email</div>
+        <div class="flow-box orange">4. Call Tool: send_email(to, html) → Sent!</div>
+        <div class="flow-box green">5. Reply: "Done! Email sent with weather report."</div>
+      </div>
+    </div>
+  </div>
+  <div class="tip" style="margin-top:16px;">🔑 Key point: The LLM doesn't <em>execute</em> tools, it only <em>requests</em> them. The actual function runs in our code and the result gets fed back.</div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 5 — ReAct Pattern ═══════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-number">5 / 22</div>
+  <div class="section-badge badge-genai">GenAI vs Agentic AI</div>
+  <h2>The Agent Loop: ReAct Pattern</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:20px;">The most common agent pattern is <strong style="color:#fff;">ReAct</strong> (<strong style="color:var(--blue);">Re</strong>ason + <strong style="color:var(--green);">Act</strong>). The agent thinks, acts, observes the result, and repeats.</p>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:32px; height:32px; background:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">1</div>
+          <div class="flow-box highlight" style="flex:1;">REASON: What do I need to do?</div>
+        </div>
+        <div style="margin-left:16px; color:var(--muted); font-size:0.85rem;">↓</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:32px; height:32px; background:var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">2</div>
+          <div class="flow-box green" style="flex:1;">ACT: Call a tool (or give final answer)</div>
+        </div>
+        <div style="margin-left:16px; color:var(--muted); font-size:0.85rem;">↓</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:32px; height:32px; background:var(--warn); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">3</div>
+          <div class="flow-box orange" style="flex:1;">OBSERVE: What did the tool return?</div>
+        </div>
+        <div style="margin-left:16px; color:var(--muted); font-size:0.85rem;">↓ loop back to REASON</div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:32px; height:32px; background:var(--danger); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">✓</div>
+          <div class="flow-box red" style="flex:1;">FINAL ANSWER: Task complete</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr><th>Feature</th><th>GenAI</th><th>Agentic AI</th></tr>
+        <tr><td>Mode</td><td>Request→Response</td><td>Plan→Act→Loop</td></tr>
+        <tr><td>Memory</td><td>None</td><td>Short + Long term</td></tr>
+        <tr><td>Tools</td><td>❌</td><td>✅ APIs, DB, Code</td></tr>
+        <tr><td>Decisions</td><td>❌</td><td>✅ Branch, retry</td></tr>
+        <tr><td>Multi-step</td><td>❌</td><td>✅</td></tr>
+        <tr><td>Cost</td><td>Low</td><td>Higher (more calls)</td></tr>
+        <tr><td>Frameworks</td><td>LangChain</td><td>LangGraph</td></tr>
+      </table>
+      <div class="warn-box" style="margin-top:12px;">⚠️ More power = more responsibility. Agentic AI can take real actions, so always add guardrails!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 6 — Memory ═══════════════════════════ -->
+<div class="slide" id="slide-6">
+  <div class="slide-number">6 / 22</div>
+  <div class="section-badge badge-memory">Memory</div>
+  <h2>Why Memory Matters</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">LLMs are <strong style="color:#fff;">stateless by default</strong>. Without memory, every call is independent.</p>
+      <div class="card" style="margin-bottom:16px; border-left: 3px solid var(--danger);">
+        <h3 style="color:#ff7b72; margin-bottom:8px;">❌ Without Memory</h3>
+        <div style="font-size:0.88rem; line-height:1.8;">
+          <div><span style="color:var(--blue);">User:</span> "My name is Navin"</div>
+          <div><span style="color:var(--green);">AI:</span> "Hello Navin!"</div>
+          <div style="margin-top:8px;"><span style="color:var(--blue);">User:</span> "What is my name?"</div>
+          <div><span style="color:var(--danger);">AI:</span> "I don't know your name." ← Wrong!</div>
+        </div>
+      </div>
+      <div class="card" style="border-left: 3px solid var(--accent);">
+        <h3 style="color:var(--green); margin-bottom:8px;">✅ With Memory</h3>
+        <div style="font-size:0.88rem; line-height:1.8;">
+          <div><span style="color:var(--blue);">User:</span> "My name is Navin"</div>
+          <div><span style="color:var(--green);">AI:</span> "Hello Navin!"</div>
+          <div style="margin-top:8px;"><span style="color:var(--blue);">User:</span> "What is my name?"</div>
+          <div><span style="color:var(--accent);">AI:</span> "Your name is Navin." ← Correct!</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <table>
+        <tr><th>Type</th><th>How</th><th>Best For</th></tr>
+        <tr><td><strong>In-Context</strong></td><td>Append all messages</td><td>Short conversations</td></tr>
+        <tr><td><strong>Summarization</strong></td><td>Summarize old messages</td><td>Long conversations</td></tr>
+        <tr><td><strong>Vector DB</strong></td><td>Similarity search</td><td>Knowledge bases</td></tr>
+        <tr><td><strong>Checkpointer</strong></td><td>Persist graph state</td><td>Multi-session agents</td></tr>
+      </table>
+      <div class="tip" style="margin-top:16px;">💡 In-context memory is the simplest: just pass the entire <code style="color:var(--orange);">chat_history</code> list on every call. The list <em>is</em> the memory.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 7 — Memory Code ═══════════════════════════ -->
+<div class="slide" id="slide-7">
+  <div class="slide-number">7 / 22</div>
+  <div class="section-badge badge-memory">Memory</div>
+  <h2>In-Context Memory: Code</h2>
+  <div style="display:flex; gap:24px; min-height:0;">
+    <pre style="flex:1;"><span class="cm"># ChatBot.py — In-context memory (chat history)</span>
+<span class="kw">from</span> langchain_google_genai <span class="kw">import</span> <span class="cls">ChatGoogleGenerativeAI</span>
+<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> <span class="cls">HumanMessage</span>, <span class="cls">AIMessage</span>, <span class="cls">SystemMessage</span>
+
+model = <span class="cls">ChatGoogleGenerativeAI</span>(model=<span class="str">"gemini-3.1-flash-lite"</span>)
+
+<span class="cm"># ✅ Start with system prompt — this stays throughout</span>
+chat_history = [
+    <span class="cls">SystemMessage</span>(
+        content=<span class="str">"You are a helpful Coding AI assistant."</span>
+    )
+]
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    user_input = <span class="fn">input</span>(<span class="str">"You: "</span>)
+    <span class="kw">if</span> user_input.<span class="fn">lower</span>() == <span class="str">"exit"</span>:
+        <span class="kw">break</span>
+
+    <span class="cm"># ✅ Add user message to history</span>
+    chat_history.<span class="fn">append</span>(<span class="cls">HumanMessage</span>(content=user_input))
+
+    <span class="cm"># ✅ Send ENTIRE history — this is the memory!</span>
+    response = model.<span class="fn">invoke</span>(chat_history)
+
+    <span class="cm"># ✅ Add AI reply to history for next round</span>
+    chat_history.<span class="fn">append</span>(<span class="cls">AIMessage</span>(content=response.text))
+
+    <span class="fn">print</span>(<span class="str">f"AI: {response.text}"</span>)</pre>
+    <div style="flex:1; min-height:0; display:flex; flex-direction:column; gap:16px;">
+      <div class="card">
+        <h3>What's happening:</h3>
+        <div class="flow" style="flex-direction:column; gap:6px; font-size:0.85rem;">
+          <div><strong style="color:var(--blue);">Turn 1:</strong> <code>[System, Human("My name is Navin")]</code> → AI</div>
+          <div style="color:var(--muted);">↓ append AIMessage to list</div>
+          <div><strong style="color:var(--blue);">Turn 2:</strong> <code>[System, Human, AI, Human("What's my name?")]</code> → AI</div>
+          <div style="color:var(--muted);">↓ AI sees full history → "Your name is Navin"</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Persistent Memory (LangGraph)</h3>
+        <pre style="font-size:0.78rem; margin-top:8px;"><span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> <span class="cls">InMemorySaver</span>
+
+checkpointer = <span class="cls">InMemorySaver</span>()
+app = graph.<span class="fn">compile</span>(checkpointer=checkpointer)
+
+<span class="cm"># thread_id = separate conversation</span>
+config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="str">"user_navin"</span>}}
+
+app.<span class="fn">invoke</span>(message, config=config)
+<span class="cm"># Resume same conversation later!</span></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 8 — LangChain Overview ═══════════════════════════ -->
+<div class="slide" id="slide-8">
+  <div class="slide-number">8 / 22</div>
+  <div class="section-badge badge-langchain">LangChain</div>
+  <h2>LangChain: Building Blocks</h2>
+  <div class="cols-3" style="margin-bottom:20px;">
+    <div class="icon-box">
+      <div class="icon">🧠</div>
+      <div class="icon-text">
+        <h4>ChatModel</h4>
+        <p>Wrapper around any LLM (Gemini, GPT, Claude)</p>
+      </div>
+    </div>
+    <div class="icon-box">
+      <div class="icon">📝</div>
+      <div class="icon-text">
+        <h4>PromptTemplate</h4>
+        <p>Reusable prompts with variable placeholders</p>
+      </div>
+    </div>
+    <div class="icon-box">
+      <div class="icon">🔍</div>
+      <div class="icon-text">
+        <h4>OutputParser</h4>
+        <p>Parse LLM output into strings, JSON, or Python objects</p>
+      </div>
+    </div>
+    <div class="icon-box">
+      <div class="icon">⛓️</div>
+      <div class="icon-text">
+        <h4>Chain (LCEL)</h4>
+        <p>Connect components with the <code>|</code> pipe operator</p>
+      </div>
+    </div>
+    <div class="icon-box">
+      <div class="icon">🔧</div>
+      <div class="icon-text">
+        <h4>Tool</h4>
+        <p>Python function the LLM can call</p>
+      </div>
+    </div>
+    <div class="icon-box">
+      <div class="icon">📚</div>
+      <div class="icon-text">
+        <h4>Retriever</h4>
+        <p>Fetch relevant docs from a vector DB</p>
+      </div>
+    </div>
+  </div>
+  <div class="cols-2">
+    <pre><span class="cm"># Chain.py — LCEL pipe operator</span>
+step1 = <span class="cls">PromptTemplate</span>(
+    template=<span class="str">"Write an article on {topic}"</span>)
+
+step2 = <span class="cls">PromptTemplate</span>(
+    template=<span class="str">"Create 5 MCQs based on:\n{article}"</span>)
+
+<span class="cm"># ✅ Chain: topic → article → MCQs</span>
+chain = (step1
+       | model
+       | <span class="cls">StrOutputParser</span>()
+       | step2
+       | model
+       | <span class="cls">StrOutputParser</span>())
+
+result = chain.<span class="fn">invoke</span>({<span class="str">'topic'</span>: <span class="str">'AI in IT'</span>})</pre>
+    <div>
+      <p style="color:var(--muted); font-size:0.9rem; margin-bottom:12px;">The <strong style="color:#fff;">pipe operator <code>|</code></strong> chains components. Output of each becomes input to the next, just like Unix pipes.</p>
+      <div class="flow" style="flex-direction:column; align-items:flex-start; gap:4px; font-size:0.82rem;">
+        <div class="flow-box">{topic: 'AI in IT'}</div>
+        <div style="color:var(--muted); padding-left:12px;">↓ step1</div>
+        <div class="flow-box highlight">"Write an article on AI in IT"</div>
+        <div style="color:var(--muted); padding-left:12px;">↓ model</div>
+        <div class="flow-box">AIMessage("AI is transforming...")</div>
+        <div style="color:var(--muted); padding-left:12px;">↓ StrOutputParser</div>
+        <div class="flow-box orange">"AI is transforming..." (plain str)</div>
+        <div style="color:var(--muted); padding-left:12px;">↓ step2 → model → parser</div>
+        <div class="flow-box green">"Q1: What is AI? A)..."</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 9 — Structured Output ═══════════════════════════ -->
+<div class="slide" id="slide-9">
+  <div class="slide-number">9 / 22</div>
+  <div class="section-badge badge-langchain">LangChain</div>
+  <h2>Structured Output: Typed Python Objects</h2>
+  <div class="cols-2">
+    <pre><span class="cm"># Structured_Output.py</span>
+<span class="kw">from</span> pydantic <span class="kw">import</span> <span class="cls">BaseModel</span>, <span class="cls">Field</span>
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">Literal</span>
+
+<span class="cm"># ✅ Define EXACTLY what you want back</span>
+<span class="kw">class</span> <span class="cls">Feedback</span>(<span class="cls">BaseModel</span>):
+    name: str = <span class="cls">Field</span>(description=<span class="str">"Participant name"</span>)
+    sentiment: <span class="cls">Literal</span>[<span class="str">'positive'</span>, <span class="str">'negative'</span>] = <span class="cls">Field</span>(
+        description=<span class="str">"Sentiment of feedback"</span>
+    )
+    highlights: list[str] = <span class="cls">Field</span>(
+        description=<span class="str">"List of positive points"</span>
+    )
+    rating: str = <span class="cls">Field</span>(description=<span class="str">"Rating out of 5"</span>)
+
+<span class="cm"># ✅ Bind schema to model</span>
+structured_model = model.<span class="fn">with_structured_output</span>(<span class="cls">Feedback</span>)
+
+<span class="cm"># ✅ Feed raw text — get typed object back</span>
+result = structured_model.<span class="fn">invoke</span>(
+    <span class="str">"The Java training was great. Trainer was excellent. </span>
+<span class="str">     Rating: 4/5. Name: Navin Kumar."</span>
+)
+
+<span class="fn">print</span>(result.sentiment)   <span class="cm"># → "positive"</span>
+<span class="fn">print</span>(result.name)        <span class="cm"># → "Navin Kumar"</span>
+<span class="fn">print</span>(result.rating)      <span class="cm"># → "4/5"</span></pre>
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">Instead of parsing text manually, we tell the LLM the <strong style="color:#fff;">exact structure</strong> we need. It returns a validated Python object.</p>
+      <div class="flow" style="flex-direction:column; align-items:flex-start; gap:8px;">
+        <div class="flow-box">"The Java training was great..." (raw text)</div>
+        <div style="color:var(--muted); padding-left:12px;">↓ structured_model.invoke()</div>
+        <div class="flow-box green">Feedback(
+  name="Navin Kumar",
+  sentiment="positive",
+  rating="4/5",
+  highlights=[...]
+)</div>
+      </div>
+      <div class="tip" style="margin-top:16px;">🏆 Use Structured Output when the output needs a specific format: routing decisions, data extraction, classification, form filling.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 10 — LangGraph ═══════════════════════════ -->
+<div class="slide" id="slide-10">
+  <div class="slide-number">10 / 22</div>
+  <div class="section-badge badge-langchain">LangGraph</div>
+  <h2>LangGraph: Agent State Graphs</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">LangGraph adds a <strong style="color:#fff;">graph-based execution model</strong> on top of LangChain. Think of it as a flowchart where each box is an AI function.</p>
+      <table>
+        <tr><th>Concept</th><th>Description</th></tr>
+        <tr><td><strong>State</strong></td><td>TypedDict (data flowing through graph)</td></tr>
+        <tr><td><strong>Node</strong></td><td>Python function that reads/writes state</td></tr>
+        <tr><td><strong>Edge</strong></td><td>Arrow connecting nodes</td></tr>
+        <tr><td><strong>Conditional Edge</strong></td><td>Branch based on state value</td></tr>
+        <tr><td><strong>compile()</strong></td><td>Lock graph, make it runnable</td></tr>
+        <tr><td><strong>invoke()</strong></td><td>Run the graph with an input</td></tr>
+      </table>
+      <div class="tip" style="margin-top:16px;">💡 LangGraph is what powers <strong>LangChain Agents</strong> internally. It's the execution engine for the agentic loop.</div>
+    </div>
+    <pre><span class="cm"># Chatbot.py — Simplest LangGraph</span>
+<span class="kw">from</span> langgraph.graph <span class="kw">import</span> START, END, <span class="cls">StateGraph</span>
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">TypedDict</span>, <span class="cls">Annotated</span>
+<span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
+
+<span class="cm"># 1. Define STATE</span>
+<span class="kw">class</span> <span class="cls">ChatBotState</span>(<span class="cls">TypedDict</span>):
+    <span class="cm"># add_messages = APPEND, not replace</span>
+    messages: <span class="cls">Annotated</span>[list, add_messages]
+
+<span class="cm"># 2. Define a NODE</span>
+<span class="kw">def</span> <span class="fn">ChatBotNode</span>(state: <span class="cls">ChatBotState</span>):
+    result = llm.<span class="fn">invoke</span>(state[<span class="str">'messages'</span>])
+    <span class="kw">return</span> {<span class="str">'messages'</span>: [result]}
+
+<span class="cm"># 3. Build GRAPH</span>
+graph = <span class="cls">StateGraph</span>(<span class="cls">ChatBotState</span>)
+graph.<span class="fn">add_node</span>(<span class="str">'ChatBotNode'</span>, <span class="fn">ChatBotNode</span>)
+graph.<span class="fn">add_edge</span>(START, <span class="str">'ChatBotNode'</span>)
+graph.<span class="fn">add_edge</span>(<span class="str">'ChatBotNode'</span>, END)
+
+<span class="cm"># 4. COMPILE and RUN</span>
+workflow = graph.<span class="fn">compile</span>()
+response = workflow.<span class="fn">invoke</span>({
+    <span class="str">'messages'</span>: <span class="cls">HumanMessage</span>(content=<span class="str">"Hello!"</span>)
+})</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 11 — LangGraph Conditional ═══════════════════════════ -->
+<div class="slide" id="slide-11">
+  <div class="slide-number">11 / 22</div>
+  <div class="section-badge badge-langchain">LangGraph</div>
+  <h2>LangGraph: Conditional Routing</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">Real-world agents need to <strong style="color:#fff;">branch</strong>, meaning go to different nodes based on data. From <code>main.py</code> (Feedback Email System):</p>
+      <div style="margin: 16px 0;">
+        <div class="flow" style="justify-content:center;">
+          <div class="flow-box highlight">[START]</div>
+        </div>
+        <div style="text-align:center; color:var(--muted); padding:4px;">↓</div>
+        <div class="flow" style="justify-content:center;">
+          <div class="flow-box">[AnalyzeFeedback]</div>
+        </div>
+        <div style="text-align:center; color:var(--muted); padding:4px;">↓ conditional edge</div>
+        <div class="flow" style="justify-content:center; gap:40px;">
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+            <div style="font-size:0.78rem; color:var(--green);">positive</div>
+            <div class="flow-box green">[GeneratePositiveEmail]</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
+            <div style="font-size:0.78rem; color:#ff7b72;">negative</div>
+            <div class="flow-box red">[GenerateNegativeEmail]</div>
+          </div>
+        </div>
+        <div style="text-align:center; color:var(--muted); padding:4px;">↓</div>
+        <div class="flow" style="justify-content:center;">
+          <div class="flow-box orange">[SendEmailNode]</div>
+        </div>
+        <div style="text-align:center; color:var(--muted); padding:4px;">↓</div>
+        <div class="flow" style="justify-content:center;">
+          <div class="flow-box highlight">[END]</div>
+        </div>
+      </div>
+    </div>
+    <pre><span class="cm"># main.py — Conditional routing</span>
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">Literal</span>
+
+<span class="cm"># ✅ Conditional edge function</span>
+<span class="cm">#    Returns the NAME of the next node</span>
+<span class="kw">def</span> <span class="fn">CheckCondition</span>(state) -> <span class="cls">Literal</span>[
+        <span class="str">"GeneratePositiveEmail"</span>,
+        <span class="str">"GenerateNegativeEmail"</span>]:
+    <span class="kw">if</span> state[<span class="str">"sentiment"</span>] == <span class="str">"positive"</span>:
+        <span class="kw">return</span> <span class="str">"GeneratePositiveEmail"</span>
+    <span class="kw">else</span>:
+        <span class="kw">return</span> <span class="str">"GenerateNegativeEmail"</span>
+
+<span class="cm"># ✅ Wire up conditional routing</span>
+graph.<span class="fn">add_conditional_edges</span>(
+    <span class="str">"AnalyzeFeedback"</span>,
+    <span class="fn">CheckCondition</span>
+)
+
+<span class="cm"># ✅ Structured Output for classification</span>
+<span class="kw">class</span> <span class="cls">FeedBack</span>(<span class="cls">BaseModel</span>):
+    sentiment: <span class="cls">Literal</span>[<span class="str">"positive"</span>, <span class="str">"negative"</span>]
+    participant_name: str
+    rating: str
+    email_address: str
+
+<span class="kw">def</span> <span class="fn">AnalyzeFeedback</span>(state) -> AgentState:
+    structured_model = llm.<span class="fn">with_structured_output</span>(<span class="cls">FeedBack</span>)
+    response = structured_model.<span class="fn">invoke</span>(state[<span class="str">"feedback"</span>])
+    <span class="kw">return</span> {
+        <span class="str">"sentiment"</span>: response.sentiment,
+        <span class="str">"participant_name"</span>: response.participant_name,
+    }</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 12 — Tools ═══════════════════════════ -->
+<div class="slide" id="slide-12">
+  <div class="slide-number">12 / 22</div>
+  <div class="section-badge badge-tools">Tools</div>
+  <h2>Tool / Function Calls</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">A <strong style="color:#fff;">tool</strong> is a Python function the LLM can <em>request</em> to be called. The LLM decides <strong>which tool</strong> to call and with <strong>what arguments</strong>.</p>
+      <div class="flow" style="flex-direction:column; align-items:flex-start; gap:6px; font-size:0.85rem; margin-bottom:16px;">
+        <div class="flow-box">"Add 'Buy milk' to my todo list"</div>
+        <div style="color:var(--muted);">↓ LLM decides: call add_todo</div>
+        <div class="flow-box highlight">LLM outputs: {tool: "add_todo", args: {todo: "Buy milk"}}</div>
+        <div style="color:var(--muted);">↓ LangChain executes the function</div>
+        <div class="flow-box green">add_todo("Buy milk") → "Todo added"</div>
+        <div style="color:var(--muted);">↓ Result fed back to LLM</div>
+        <div class="flow-box">"Done! 'Buy milk' added to your todos."</div>
+      </div>
+      <div class="warn-box">⚠️ The docstring is CRITICAL. It tells the LLM what the tool does and when to use it. Write clear, specific docstrings!</div>
+    </div>
+    <pre><span class="cm"># Task_Manager.py — Tool definitions</span>
+<span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
+
+<span class="cm"># ✅ @tool decorator = LLM-callable function</span>
+<span class="cm"># ✅ Docstring = instructions for the LLM</span>
+<span class="cm"># ✅ Type hints = tells LLM expected arg types</span>
+
+@tool
+<span class="kw">def</span> <span class="fn">add_todo</span>(todo: str):
+    <span class="str">"""Add a new todo item to the database."""</span>
+    cursor.<span class="fn">execute</span>(
+        <span class="str">"INSERT INTO todos VALUES (?,?)"</span>, (todo, <span class="kw">False</span>))
+    con.<span class="fn">commit</span>()
+    <span class="kw">return</span> <span class="str">"Todo added successfully"</span>
+
+@tool
+<span class="kw">def</span> <span class="fn">get_all_todos</span>():
+    <span class="str">"""Get all todo items from the database."""</span>
+    cursor.<span class="fn">execute</span>(<span class="str">"SELECT * FROM todos"</span>)
+    <span class="kw">return</span> cursor.<span class="fn">fetchall</span>()
+
+@tool
+<span class="kw">def</span> <span class="fn">delete_todo</span>(todo_id: int):
+    <span class="str">"""Delete a todo by its ID."""</span>
+    cursor.<span class="fn">execute</span>(<span class="str">"DELETE FROM todos WHERE id=?"</span>, (todo_id,))
+    con.<span class="fn">commit</span>()
+    <span class="kw">return</span> <span class="str">f"Todo {todo_id} deleted"</span></pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 13 — Tool Agent ═══════════════════════════ -->
+<div class="slide" id="slide-13">
+  <div class="slide-number">13 / 22</div>
+  <div class="section-badge badge-tools">Tools</div>
+  <h2>Tool Agent: Register &amp; Use Tools</h2>
+  <div class="cols-2">
+    <pre><span class="cm"># Create an agent with tools</span>
+<span class="kw">from</span> langchain_google_genai <span class="kw">import</span> <span class="cls">ChatGoogleGenerativeAI</span>
+<span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
+<span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> <span class="cls">InMemorySaver</span>
+
+llm = <span class="cls">ChatGoogleGenerativeAI</span>(model=<span class="str">"gemini-3.1-flash-lite"</span>)
+
+<span class="cm"># ✅ Register all tools with the agent</span>
+agent = <span class="fn">create_agent</span>(
+    model=llm,
+    system_prompt=<span class="str">"You are a task manager. Use tools."</span>,
+    tools=[add_todo, get_all_todos, delete_todo, update_todo],
+    checkpointer=<span class="cls">InMemorySaver</span>()  <span class="cm"># memory!</span>
+)
+
+<span class="cm"># ✅ thread_id = separate conversation per user</span>
+config = {<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="num">1</span>}}
+
+<span class="kw">while</span> <span class="kw">True</span>:
+    user_input = <span class="fn">input</span>(<span class="str">"You: "</span>)
+    <span class="kw">if</span> user_input.<span class="fn">lower</span>() == <span class="str">"exit"</span>: <span class="kw">break</span>
+    response = agent.<span class="fn">invoke</span>(
+        {<span class="str">"messages"</span>: [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: user_input}]},
+        config=config
+    )
+    <span class="fn">print</span>(response[<span class="str">"messages"</span>][-<span class="num">1</span>].text)</pre>
+    <div>
+      <h3 style="margin-bottom:16px;">ToolNode in LangGraph</h3>
+      <pre style="font-size:0.8rem;"><span class="kw">from</span> langgraph.prebuilt <span class="kw">import</span> <span class="cls">ToolNode</span>, tools_condition
+
+tools = [add_todo, get_all_todos, delete_todo]
+llm_with_tools = llm.<span class="fn">bind_tools</span>(tools)
+
+<span class="kw">def</span> <span class="fn">agent_node</span>(state):
+    <span class="kw">return</span> {<span class="str">"messages"</span>: [llm_with_tools.<span class="fn">invoke</span>(state[<span class="str">"messages"</span>])]}
+
+graph.<span class="fn">add_node</span>(<span class="str">"agent"</span>, agent_node)
+graph.<span class="fn">add_node</span>(<span class="str">"tools"</span>, <span class="cls">ToolNode</span>(tools))
+graph.<span class="fn">add_conditional_edges</span>(<span class="str">"agent"</span>, tools_condition)
+graph.<span class="fn">add_edge</span>(<span class="str">"tools"</span>, <span class="str">"agent"</span>)  <span class="cm"># ← loop back!</span></pre>
+      <div class="flow" style="justify-content:center; margin-top:12px; gap:8px; font-size:0.82rem;">
+        <div class="flow-box highlight">agent</div>
+        <div class="flow-arrow">⇄</div>
+        <div class="flow-box orange">tools</div>
+        <div style="color:var(--muted);">(loop until done)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 14 — Human-in-the-Loop ═══════════════════════════ -->
+<div class="slide" id="slide-14">
+  <div class="slide-number">14 / 22</div>
+  <div class="section-badge badge-hitl">Human-in-the-Loop</div>
+  <h2>Human-in-the-Loop (HITL)</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">Agents can make <strong style="color:#fff;">irreversible mistakes</strong>. HITL adds a pause-point where a human reviews before the agent proceeds.</p>
+      <div class="flex-col">
+        <div class="icon-box">
+          <div class="icon">📧</div>
+          <div class="icon-text">
+            <h4>Approve/Reject</h4>
+            <p>Pause before sending emails, notifications, or posts</p>
+          </div>
+        </div>
+        <div class="icon-box">
+          <div class="icon">💰</div>
+          <div class="icon-text">
+            <h4>Financial Actions</h4>
+            <p>Approve before any money transfer or budget spend</p>
+          </div>
+        </div>
+        <div class="icon-box">
+          <div class="icon">🗑️</div>
+          <div class="icon-text">
+            <h4>Delete Operations</h4>
+            <p>Confirm before deleting records or files</p>
+          </div>
+        </div>
+        <div class="icon-box">
+          <div class="icon">✏️</div>
+          <div class="icon-text">
+            <h4>Review & Edit</h4>
+            <p>Human can edit AI content before it's used</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <pre><span class="cm"># main.py — interrupt() pauses the graph</span>
+<span class="kw">from</span> langgraph.types <span class="kw">import</span> interrupt, <span class="cls">Command</span>
+
+@tool
+<span class="kw">def</span> <span class="fn">Send_Email</span>(email_address: str, body: str):
+    <span class="str">"""Send an email. Requires human approval."""</span>
+
+    <span class="cm"># ✅ PAUSE — saves graph state, waits for human</span>
+    decision = <span class="fn">interrupt</span>(<span class="str">"Do you want to send this email?"</span>)
+
+    <span class="kw">if</span> decision.<span class="fn">lower</span>() == <span class="str">"yes"</span>:
+        <span class="cm"># send the email</span>
+        <span class="kw">return</span> <span class="str">"Email sent!"</span>
+    <span class="kw">else</span>:
+        <span class="kw">return</span> <span class="str">"Email cancelled."</span>
+
+<span class="cm"># Checkpointer REQUIRED for interrupt</span>
+app = graph.<span class="fn">compile</span>(checkpointer=<span class="cls">InMemorySaver</span>())
+
+<span class="cm"># 1st run — hits interrupt(), pauses</span>
+app.<span class="fn">invoke</span>({"feedback": user_input}, config=config)
+
+<span class="cm"># Human decides</span>
+human_answer = <span class="fn">input</span>(<span class="str">"Approve? (yes/no): "</span>)
+
+<span class="cm"># Resume — graph continues from where it paused</span>
+app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human_answer), config=config)</pre>
+      <div class="tip" style="margin-top:8px; font-size:0.82rem;">💡 The graph state is <strong>saved to the checkpointer</strong> when interrupt() fires. The same <code>thread_id</code> resumes from exactly where it stopped.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 15 — Single Agent ═══════════════════════════ -->
+<div class="slide" id="slide-15">
+  <div class="slide-number">15 / 22</div>
+  <div class="section-badge badge-multiagent">Single Agent</div>
+  <h2>Single Agent Systems</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">One LLM with a set of tools. The agent plans and executes everything itself.</p>
+      <div style="text-align:center; margin: 20px 0;">
+        <div class="flow-box" style="display:inline-block; margin-bottom:8px;">User Request</div>
+        <div style="color:var(--muted);">↓</div>
+        <div style="background:var(--card); border:2px solid var(--primary); border-radius:12px; padding:16px 24px; display:inline-block; margin:8px 0;">
+          <div style="font-weight:700; color:#fff; margin-bottom:8px;">Single Agent LLM</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <span class="pill pill-orange">tool_search</span>
+            <span class="pill pill-blue">tool_db</span>
+            <span class="pill pill-green">tool_api</span>
+          </div>
+        </div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box green" style="display:inline-block; margin-top:8px;">Final Answer</div>
+      </div>
+      <table>
+        <tr><th></th><th>Single Agent</th></tr>
+        <tr><td>Complexity</td><td>Low</td></tr>
+        <tr><td>Best for</td><td>CRUD, Q&A, simple tasks</td></tr>
+        <tr><td>Cost</td><td>Lower</td></tr>
+        <tr><td>Examples</td><td>Task Manager, Weather Bot</td></tr>
+      </table>
+    </div>
+    <pre><span class="cm"># Single Agent — Task Manager (Task_Manager.py)</span>
+<span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
+
+agent = <span class="fn">create_agent</span>(
+    model=llm,
+    system_prompt=<span class="str">"You are a task manager assistant."</span>,
+    tools=[add_todo, get_all_todos, delete_todo, update_todo],
+    checkpointer=<span class="cls">InMemorySaver</span>()
+)
+
+<span class="cm"># Agent handles ALL of this naturally:</span>
+<span class="cm"># "Add buy milk to my todos"</span>
+<span class="cm">#  → calls add_todo("Buy milk")</span>
+<span class="cm">#  → "Done! 'Buy milk' added."</span>
+
+<span class="cm"># "Show incomplete todos, mark #3 done"</span>
+<span class="cm">#  → calls get_all_todos()</span>
+<span class="cm">#  → calls update_todo(3, completed=True)</span>
+<span class="cm">#  → "I've shown your todos and marked #3 complete!"</span>
+
+<span class="cm"># "Delete all completed todos"</span>
+<span class="cm">#  → calls get_all_todos()</span>
+<span class="cm">#  → filters completed ones</span>
+<span class="cm">#  → calls delete_todo() for each</span>
+<span class="cm">#  → "Deleted 3 completed todos!"</span>
+
+response = agent.<span class="fn">invoke</span>(
+    {<span class="str">"messages"</span>: [{<span class="str">"role"</span>: <span class="str">"user"</span>, <span class="str">"content"</span>: user_input}]},
+    config={<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="num">1</span>}}
+)</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 16 — Multi-Agent ═══════════════════════════ -->
+<div class="slide" id="slide-16">
+  <div class="slide-number">16 / 22</div>
+  <div class="section-badge badge-multiagent">Multi-Agent</div>
+  <h2>Multi-Agent Systems</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:16px;">Multiple <strong style="color:#fff;">specialized agents</strong> collaborate. Each has a focused role, just like a real team.</p>
+      <div style="text-align:center;">
+        <div class="flow-box" style="display:inline-block; margin-bottom:8px;">User Request</div>
+        <div style="color:var(--muted);">↓</div>
+        <div style="background:var(--card); border:2px solid var(--warn); border-radius:12px; padding:12px 20px; display:inline-block; margin:6px 0;">
+          <div style="font-weight:700; color:var(--warn); margin-bottom:8px;">🎯 Main Agent</div>
+        </div>
+        <div style="color:var(--muted);">↓ assigns tasks</div>
+        <div style="display:flex; gap:12px; justify-content:center; margin: 8px 0; flex-wrap:wrap;">
+          <div style="background:#1a73e820; border:1px solid var(--primary); border-radius:8px; padding:8px 12px; text-align:center; font-size:0.82rem;">
+            <div>🔍</div><div style="color:var(--blue);">Research<br>Agent</div>
+          </div>
+          <div style="background:#34a85320; border:1px solid var(--accent); border-radius:8px; padding:8px 12px; text-align:center; font-size:0.82rem;">
+            <div>✍️</div><div style="color:var(--green);">Writer<br>Agent</div>
+          </div>
+          <div style="background:#ff980020; border:1px solid #ff9800; border-radius:8px; padding:8px 12px; text-align:center; font-size:0.82rem;">
+            <div>💻</div><div style="color:var(--orange);">Code<br>Agent</div>
+          </div>
+          <div style="background:#9c27b020; border:1px solid #9c27b0; border-radius:8px; padding:8px 12px; text-align:center; font-size:0.82rem;">
+            <div>🔎</div><div style="color:var(--purple);">Review<br>Agent</div>
+          </div>
+        </div>
+        <div style="color:var(--muted);">↓ collect results</div>
+        <div class="flow-box green" style="display:inline-block; margin-top:6px;">Final Output</div>
+      </div>
+    </div>
+    <div>
+      <table style="margin-bottom:16px;">
+        <tr><th></th><th>Single Agent</th><th>Multi-Agent</th></tr>
+        <tr><td>Complexity</td><td>Low</td><td>High</td></tr>
+        <tr><td>Specialization</td><td>Generalist</td><td>Specialist per role</td></tr>
+        <tr><td>Cost</td><td>Lower</td><td>Higher</td></tr>
+        <tr><td>Best for</td><td>CRUD, Q&A</td><td>Research, build, review</td></tr>
+        <tr><td>Frameworks</td><td>LangChain Agent</td><td>LangGraph</td></tr>
+      </table>
+      <div class="card">
+        <h3>Real example in code:</h3>
+        <p style="font-size:0.85rem; color:var(--muted); margin:8px 0;">
+          <strong style="color:#fff;">demo8_multi_agent.py</strong><br>
+          → <span style="color:var(--orange);">Research Agent</span> gathers info<br>
+          → <span style="color:var(--blue);">Writer Agent</span> writes the output<br>
+          → Both agents share state through LangGraph
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════ SLIDE 17 — RAG ═══════════════════════════ -->
+<div class="slide" id="slide-17">
+  <div class="slide-number">17 / 22</div>
+  <div class="section-badge badge-rag">Bonus: RAG</div>
+  <h2>RAG (Retrieval-Augmented Generation)</h2>
+  <div class="cols-2">
+    <div>
+      <p style="color:var(--muted); margin-bottom:12px;"><strong style="color:#fff;">Problem:</strong> The LLM has no knowledge of our internal documents. RAG solves this without fine-tuning.</p>
+      <div class="flow" style="flex-direction:column; align-items:center; gap:6px; font-size:0.82rem;">
+        <div class="flow-box">1. Load documents (PDF, Word, web)</div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box">2. Chunk into small pieces (500 chars)</div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box highlight">3. Embed → convert text to vectors</div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box highlight">4. Store in ChromaDB (vector database)</div>
+        <div style="text-align:center; color:var(--muted); line-height:1.4;">
+          <div>↓</div>
+          <div style="font-size:0.68rem;">At query time:</div>
+        </div>
+        <div class="flow-box green">5. User question → find similar chunks</div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box green">6. Inject chunks into prompt as context</div>
+        <div style="color:var(--muted);">↓</div>
+        <div class="flow-box orange">7. LLM answers using YOUR data</div>
+      </div>
+    </div>
+    <pre style="font-size:0.77rem;"><span class="cm"># Langchain-RAG/main.py</span>
+<span class="cm"># ── 1. Load ──</span>
+loader = <span class="cls">PyPDFLoader</span>(<span class="str">"./Documents/HR-Policy.pdf"</span>)
+docs = loader.<span class="fn">load</span>()
+
+<span class="cm"># ── 2. Chunk ──</span>
+splitter = <span class="cls">RecursiveCharacterTextSplitter</span>(
+    chunk_size=<span class="num">500</span>, chunk_overlap=<span class="num">100</span>)
+chunks = splitter.<span class="fn">split_documents</span>(docs)
+
+<span class="cm"># ── 3+4. Embed & Store ──</span>
+embeddings = <span class="cls">GoogleGenerativeAIEmbeddings</span>(
+    model=<span class="str">"gemini-embedding-001"</span>)
+vectordb = <span class="cls">Chroma</span>.<span class="fn">from_documents</span>(
+    chunks, embeddings, persist_directory=<span class="str">"./ChromaDB"</span>)
+
+<span class="cm"># ── 5. Retrieve ──</span>
+retriever = vectordb.<span class="fn">as_retriever</span>(search_kwargs={<span class="str">"k"</span>: <span class="num">5</span>})
+
+<span class="cm"># ── 6. Prompt with context ──</span>
+prompt = <span class="cls">PromptTemplate</span>(template=<span class="str">"""
+You are an HR assistant.
+Answer using ONLY the context below.
+Context: {context}
+Question: {question}"""</span>)
+
+<span class="cm"># ── 7. Build RAG chain ──</span>
+rag_chain = (
+    <span class="cls">RunnableParallel</span>(
+        context=retriever,
+        question=<span class="cls">RunnablePassthrough</span>()
+    ) | prompt | llm | <span class="cls">StrOutputParser</span>()
+)
+
+answer = rag_chain.<span class="fn">invoke</span>(<span class="str">"What is the leave policy?"</span>)</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 18 — Best Practices ═══════════════════════════ -->
+<div class="slide" id="slide-18">
+  <div class="slide-number">18 / 22</div>
+  <h2>Dos and Don'ts When Building Agents</h2>
+  <div class="cols-2">
+    <div class="card" style="border-top:3px solid var(--danger);">
+      <h3 style="color:#ff7b72; margin-bottom:16px;">❌ Avoid This</h3>
+      <div style="display:flex; flex-direction:column; gap:14px; font-size:0.9rem;">
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--danger); font-weight:700; flex-shrink:0; margin-top:1px;">✗</span>
+          <div><strong>Only adding HumanMessage to history</strong><br><span style="color:var(--muted); font-size:0.83rem;">The AI's reply is part of the conversation too. Forget it and the bot loses context of what it said.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--danger); font-weight:700; flex-shrink:0; margin-top:1px;">✗</span>
+          <div><strong>Skipping the <code style="color:var(--orange);">@tool</code> docstring</strong><br><span style="color:var(--muted); font-size:0.83rem;">The LLM decides which tool to call based only on the docstring. No docstring = LLM picks randomly.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--danger); font-weight:700; flex-shrink:0; margin-top:1px;">✗</span>
+          <div><strong>Letting agents run destructive actions freely</strong><br><span style="color:var(--muted); font-size:0.83rem;">Sending emails or deleting records can't be undone. Without a pause, one hallucination causes real damage.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--danger); font-weight:700; flex-shrink:0; margin-top:1px;">✗</span>
+          <div><strong>Reusing the same <code style="color:var(--orange);">thread_id</code> for everyone</strong><br><span style="color:var(--muted); font-size:0.83rem;">All users end up sharing the same memory. Their conversations leak into each other.</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent);">
+      <h3 style="color:var(--green); margin-bottom:16px;">✅ Do This Instead</h3>
+      <div style="display:flex; flex-direction:column; gap:14px; font-size:0.9rem;">
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--accent); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          <div><strong>Append both messages every turn</strong><br><span style="color:var(--muted); font-size:0.83rem;">Add <code style="color:var(--orange);">HumanMessage</code> before calling the model, then <code style="color:var(--orange);">AIMessage</code> after. That list is the memory.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--accent); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          <div><strong>Write a clear <code style="color:var(--orange);">@tool</code> docstring</strong><br><span style="color:var(--muted); font-size:0.83rem;">Describe what the tool does and when to call it. If you understand it in plain English, the LLM will too.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--accent); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          <div><strong>Use <code style="color:var(--orange);">interrupt()</code> before any risky action</strong><br><span style="color:var(--muted); font-size:0.83rem;">One line to pause the agent, show the human what's about to happen, and wait for a yes or no.</span></div>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <span style="color:var(--accent); font-weight:700; flex-shrink:0; margin-top:1px;">✓</span>
+          <div><strong>Use a unique <code style="color:var(--orange);">thread_id</code> per user</strong><br><span style="color:var(--muted); font-size:0.83rem;">One ID per person keeps their session memory isolated. Think of it as a separate conversation folder.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tip" style="margin-top:16px;">💡 Start simple: one agent + two tools. Get it working first, then add complexity only when you need it.</div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 20 — Framework Comparison ═══════════════════════════ -->
+<div class="slide" id="slide-19">
+  <div class="slide-number">19 / 22</div>
+  <h2>Framework Comparison</h2>
+  <table>
+    <tr>
+      <th>Framework</th>
+      <th>Best For</th>
+      <th>Key Strength</th>
+      <th>Use When</th>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--blue);">LangChain</strong></td>
+      <td>Chains, RAG, Structured Output</td>
+      <td>Rich ecosystem, LCEL pipes</td>
+      <td>Building data pipelines, chatbots, RAG apps</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--green);">LangGraph</strong></td>
+      <td>Stateful agents, HITL, complex flows</td>
+      <td>Full control over agent loop</td>
+      <td>Custom agent workflows, conditional routing, interrupt</td>
+    </tr>
+    <tr>
+      <td><strong style="color:var(--purple);">LangChain Agent</strong></td>
+      <td>Quick single agents with tools</td>
+      <td>One-line agent creation with create_agent()</td>
+      <td>Task managers, Q&A with tools, quick prototypes</td>
+    </tr>
+  </table>
+  <div class="cols-2" style="margin-top: 20px;">
+    <div class="card card-accent-blue">
+      <h3>Start with LangChain when:</h3>
+      <ul class="check-list" style="font-size:0.88rem; margin-top:8px;">
+        <li>Building a RAG chatbot</li>
+        <li>Need structured output</li>
+        <li>Simple prompt pipelines</li>
+      </ul>
+    </div>
+    <div class="card card-accent-green">
+      <h3>Use LangGraph when:</h3>
+      <ul class="check-list" style="font-size:0.88rem; margin-top:8px;">
+        <li>Complex branching logic</li>
+        <li>Need human approval</li>
+        <li>Stateful multi-turn agents</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 21 — Cheat Sheet ═══════════════════════════ -->
+<div class="slide" id="slide-20">
+  <div class="slide-number">20 / 22</div>
+  <h2>Quick Reference Cheat Sheet</h2>
+  <div class="cols-2">
+    <pre style="font-size:0.75rem;"><span class="cm"># ── Core Imports ──</span>
+<span class="kw">from</span> langchain_google_genai <span class="kw">import</span> <span class="cls">ChatGoogleGenerativeAI</span>
+<span class="kw">from</span> langchain_core.messages <span class="kw">import</span> <span class="cls">SystemMessage</span>, <span class="cls">HumanMessage</span>, <span class="cls">AIMessage</span>
+<span class="kw">from</span> langchain_core.prompts <span class="kw">import</span> <span class="cls">PromptTemplate</span>
+<span class="kw">from</span> langchain_core.output_parsers <span class="kw">import</span> <span class="cls">StrOutputParser</span>
+<span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
+<span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
+
+<span class="kw">from</span> langgraph.graph <span class="kw">import</span> START, END, <span class="cls">StateGraph</span>, <span class="cls">MessagesState</span>
+<span class="kw">from</span> langgraph.prebuilt <span class="kw">import</span> <span class="cls">ToolNode</span>, tools_condition
+<span class="kw">from</span> langgraph.checkpoint.memory <span class="kw">import</span> <span class="cls">InMemorySaver</span>
+<span class="kw">from</span> langgraph.types <span class="kw">import</span> Command, interrupt
+<span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
+
+<span class="kw">from</span> pydantic <span class="kw">import</span> <span class="cls">BaseModel</span>, <span class="cls">Field</span>
+<span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">TypedDict</span>, <span class="cls">Annotated</span>, <span class="cls">Literal</span>
+
+<span class="cm"># ── Tool Template ──</span>
+@tool
+<span class="kw">def</span> <span class="fn">my_tool</span>(param: str) -> str:
+    <span class="str">"""Clear description of what this does and when to call it."""</span>
+    <span class="kw">return</span> <span class="str">"result"</span>
+
+<span class="cm"># ── Structured Output Template ──</span>
+<span class="kw">class</span> <span class="cls">MyOutput</span>(<span class="cls">BaseModel</span>):
+    field: str = <span class="cls">Field</span>(description=<span class="str">"what this field is"</span>)
+    category: <span class="cls">Literal</span>[<span class="str">"a"</span>, <span class="str">"b"</span>]
+
+structured = llm.<span class="fn">with_structured_output</span>(<span class="cls">MyOutput</span>)
+result = structured.<span class="fn">invoke</span>(raw_text)</pre>
+    <pre style="font-size:0.75rem;"><span class="cm"># ── LangGraph Agent Template ──</span>
+tools = [my_tool_1, my_tool_2]
+llm_with_tools = llm.<span class="fn">bind_tools</span>(tools)
+
+<span class="kw">def</span> <span class="fn">agent_node</span>(state: <span class="cls">MessagesState</span>):
+    <span class="kw">return</span> {<span class="str">"messages"</span>: [llm_with_tools.<span class="fn">invoke</span>(state[<span class="str">"messages"</span>])]}
+
+graph = <span class="cls">StateGraph</span>(<span class="cls">MessagesState</span>)
+graph.<span class="fn">add_node</span>(<span class="str">"agent"</span>, agent_node)
+graph.<span class="fn">add_node</span>(<span class="str">"tools"</span>, <span class="cls">ToolNode</span>(tools))
+graph.<span class="fn">add_edge</span>(START, <span class="str">"agent"</span>)
+graph.<span class="fn">add_conditional_edges</span>(<span class="str">"agent"</span>, tools_condition)
+graph.<span class="fn">add_edge</span>(<span class="str">"tools"</span>, <span class="str">"agent"</span>)
+app = graph.<span class="fn">compile</span>(checkpointer=<span class="cls">InMemorySaver</span>())
+
+<span class="cm"># ── Invoke ──</span>
+response = app.<span class="fn">invoke</span>(
+    {<span class="str">"messages"</span>: [<span class="cls">HumanMessage</span>(content=user_input)]},
+    config={<span class="str">"configurable"</span>: {<span class="str">"thread_id"</span>: <span class="str">"user1"</span>}}
+)
+
+<span class="cm"># ── HITL interrupt + resume ──</span>
+<span class="cm"># In tool:</span>
+decision = <span class="fn">interrupt</span>(<span class="str">"Approve? (yes/no)"</span>)
+<span class="cm"># Resume:</span>
+app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human_answer), config=config)</pre>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 21 — Summary ═══════════════════════════ -->
+<div class="slide" id="slide-21">
+  <div class="slide-number">21 / 22</div>
+  <h2>Session Summary</h2>
+  <div class="cols-3" style="margin-bottom:20px;">
+    <div class="card card-accent-blue">
+      <h3 style="font-size:0.95rem;">✅ Fundamentals</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">LLMs predict next tokens. Roles: System, Human, AI. Temperature controls creativity.</p>
+    </div>
+    <div class="card card-accent-green">
+      <h3 style="font-size:0.95rem;">✅ GenAI vs Agentic</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">GenAI = one-shot. Agentic = Reason→Act→Observe loop with tools and memory.</p>
+    </div>
+    <div class="card card-accent-purple">
+      <h3 style="font-size:0.95rem;">✅ Memory</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">Pass full chat_history on every call. Use InMemorySaver for persistent sessions.</p>
+    </div>
+    <div class="card card-accent-warn">
+      <h3 style="font-size:0.95rem;">✅ LangChain + LangGraph</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">LCEL pipes for chains. LangGraph for stateful graphs with nodes, edges, and state.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--danger);">
+      <h3 style="font-size:0.95rem;">✅ Tools</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">@tool decorator. Docstring = instructions for LLM. ToolNode executes the function.</p>
+    </div>
+    <div class="card" style="border-top:3px solid #f9c74f;">
+      <h3 style="font-size:0.95rem;">✅ HITL + Multi-Agent</h3>
+      <p style="font-size:0.82rem; color:var(--muted); margin-top:6px;">interrupt() pauses for human approval. LangGraph handles multi-agent workflows too.</p>
+    </div>
+  </div>
+  <div style="display:flex; justify-content:center; margin-top:8px;">
+    <div class="card" style="border: 1px solid var(--primary); max-width:560px; flex:1; text-align:center;">
+      <h3 style="margin-bottom:14px;">What to try next</h3>
+      <ul class="check-list" style="font-size:0.95rem; line-height:2.2; display:inline-block; text-align:left;">
+        <li>Get a Gemini API key and run demo1</li>
+        <li>Build a tool-based agent for a real use case</li>
+        <li>Add HITL to any agent that modifies data</li>
+        <li>Integrate RAG with own documents</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════ SLIDE 22 — Q&A + Thank You ═══════════════════════════ -->
+<div class="slide title-slide" id="slide-22">
+  <div class="slide-number">22 / 22</div>
+  <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; width:100%; text-align:center; gap:24px;">
+    <div style="font-size:6rem; font-weight:800; line-height:1; background:linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; padding-bottom:0.1em;">Q &amp; A</div>
+    <p style="font-size:1.25rem; color:var(--muted);">Got questions? Let's discuss!</p>
+    <div class="title-accent" style="margin:0 auto;"></div>
+    <h1 style="font-size:3.2rem; margin:0; padding-bottom:0.15em;">Thank You!</h1>
+    <p style="font-size:1.1rem; color:var(--muted); max-width:520px; line-height:1.8;">It was great having you in this session. Keep building, keep experimenting — and reach out any time.</p>
+  </div>
+</div>
+
+</div><!-- end .slides -->
+
+<!-- Navigation -->
+<div class="nav">
+  <button id="prevBtn" onclick="navigate(-1)" disabled>← Prev</button>
+  <div class="nav-progress" id="navProgress">1 / 22</div>
+  <button id="nextBtn" onclick="navigate(1)">Next →</button>
+</div>
+
+<script>
+  const TOTAL = 22;
+  let current = 1;
+
+  function navigate(dir) {
+    const prev = current;
+    current = Math.max(1, Math.min(TOTAL, current + dir));
+    if (current === prev) return;
+
+    document.getElementById('slide-' + prev).classList.remove('active');
+    document.getElementById('slide-' + current).classList.add('active');
+
+    document.getElementById('prevBtn').disabled = current === 1;
+    document.getElementById('nextBtn').disabled = current === TOTAL;
+    document.getElementById('navProgress').textContent = current + ' / ' + TOTAL;
+    document.getElementById('progressBar').style.width = ((current / TOTAL) * 100) + '%';
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') navigate(1);
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+  });
+
+  // Init progress bar
+  document.getElementById('progressBar').style.width = ((1 / TOTAL) * 100) + '%';
+</script>
+</body>
+</html>
