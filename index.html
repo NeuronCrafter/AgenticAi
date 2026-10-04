@@ -364,7 +364,7 @@
 
 <div class="slides" id="slides">
 
-<!-- ═══════════════════════════ SLIDE 1 — Title ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 1 - Title ═══════════════════════════ -->
 <div class="slide title-slide active" id="slide-1">
   <div class="slide-number">1 / 22</div>
   <div style="width:100%; display:flex; gap:40px; align-items:stretch;">
@@ -450,7 +450,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 2 — What is an LLM ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 2 - What is an LLM ═══════════════════════════ -->
 <div class="slide" id="slide-2">
   <div class="slide-number">2 / 22</div>
   <div class="section-badge badge-fundamentals">Fundamentals</div>
@@ -497,7 +497,7 @@ response = model.<span class="fn">invoke</span>(<span class="str">"What is the c
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 3 — Messages & Roles ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 3 - Messages & Roles ═══════════════════════════ -->
 <div class="slide" id="slide-3">
   <div class="slide-number">3 / 22</div>
   <div class="section-badge badge-fundamentals">Fundamentals</div>
@@ -550,12 +550,12 @@ conversation = [
     <span class="cls">HumanMessage</span>(content=<span class="str">"Give me an example."</span>)
 ]
 
-<span class="cm"># Send the whole list — model sees full context</span>
+<span class="cm"># Send the whole list - model sees full context</span>
 response = model.<span class="fn">invoke</span>(conversation)</pre>
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 4 — GenAI vs Agentic AI ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 4 - GenAI vs Agentic AI ═══════════════════════════ -->
 <div class="slide" id="slide-4">
   <div class="slide-number">4 / 22</div>
   <div class="section-badge badge-genai">GenAI vs Agentic AI</div>
@@ -595,7 +595,7 @@ response = model.<span class="fn">invoke</span>(conversation)</pre>
   <div class="tip" style="margin-top:16px;">🔑 Key point: The LLM doesn't <em>execute</em> tools, it only <em>requests</em> them. The actual function runs in our code and the result gets fed back.</div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 5 — ReAct Pattern ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 5 - ReAct Pattern ═══════════════════════════ -->
 <div class="slide" id="slide-5">
   <div class="slide-number">5 / 22</div>
   <div class="section-badge badge-genai">GenAI vs Agentic AI</div>
@@ -641,7 +641,7 @@ response = model.<span class="fn">invoke</span>(conversation)</pre>
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 6 — Memory ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 6 - Memory ═══════════════════════════ -->
 <div class="slide" id="slide-6">
   <div class="slide-number">6 / 22</div>
   <div class="section-badge badge-memory">Memory</div>
@@ -681,19 +681,19 @@ response = model.<span class="fn">invoke</span>(conversation)</pre>
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 7 — Memory Code ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 7 - Memory Code ═══════════════════════════ -->
 <div class="slide" id="slide-7">
   <div class="slide-number">7 / 22</div>
   <div class="section-badge badge-memory">Memory</div>
   <h2>In-Context Memory: Code</h2>
   <div style="display:flex; gap:24px; min-height:0;">
-    <pre style="flex:1;"><span class="cm"># ChatBot.py — In-context memory (chat history)</span>
+    <pre style="flex:1;"><span class="cm"># ChatBot.py - In-context memory (chat history)</span>
 <span class="kw">from</span> langchain_google_genai <span class="kw">import</span> <span class="cls">ChatGoogleGenerativeAI</span>
 <span class="kw">from</span> langchain_core.messages <span class="kw">import</span> <span class="cls">HumanMessage</span>, <span class="cls">AIMessage</span>, <span class="cls">SystemMessage</span>
 
 model = <span class="cls">ChatGoogleGenerativeAI</span>(model=<span class="str">"gemini-3.1-flash-lite"</span>)
 
-<span class="cm"># ✅ Start with system prompt — this stays throughout</span>
+<span class="cm"># ✅ Start with system prompt - this stays throughout</span>
 chat_history = [
     <span class="cls">SystemMessage</span>(
         content=<span class="str">"You are a helpful Coding AI assistant."</span>
@@ -708,7 +708,7 @@ chat_history = [
     <span class="cm"># ✅ Add user message to history</span>
     chat_history.<span class="fn">append</span>(<span class="cls">HumanMessage</span>(content=user_input))
 
-    <span class="cm"># ✅ Send ENTIRE history — this is the memory!</span>
+    <span class="cm"># ✅ Send ENTIRE history - this is the memory!</span>
     response = model.<span class="fn">invoke</span>(chat_history)
 
     <span class="cm"># ✅ Add AI reply to history for next round</span>
@@ -742,7 +742,7 @@ app.<span class="fn">invoke</span>(message, config=config)
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 8 — LangChain Overview ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 8 - LangChain Overview ═══════════════════════════ -->
 <div class="slide" id="slide-8">
   <div class="slide-number">8 / 22</div>
   <div class="section-badge badge-langchain">LangChain</div>
@@ -792,7 +792,7 @@ app.<span class="fn">invoke</span>(message, config=config)
     </div>
   </div>
   <div class="cols-2">
-    <pre><span class="cm"># Chain.py — LCEL pipe operator</span>
+    <pre><span class="cm"># Chain.py - LCEL pipe operator</span>
 step1 = <span class="cls">PromptTemplate</span>(
     template=<span class="str">"Write an article on {topic}"</span>)
 
@@ -825,7 +825,7 @@ result = chain.<span class="fn">invoke</span>({<span class="str">'topic'</span>:
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 9 — Structured Output ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 9 - Structured Output ═══════════════════════════ -->
 <div class="slide" id="slide-9">
   <div class="slide-number">9 / 22</div>
   <div class="section-badge badge-langchain">LangChain</div>
@@ -849,7 +849,7 @@ result = chain.<span class="fn">invoke</span>({<span class="str">'topic'</span>:
 <span class="cm"># ✅ Bind schema to model</span>
 structured_model = model.<span class="fn">with_structured_output</span>(<span class="cls">Feedback</span>)
 
-<span class="cm"># ✅ Feed raw text — get typed object back</span>
+<span class="cm"># ✅ Feed raw text - get typed object back</span>
 result = structured_model.<span class="fn">invoke</span>(
     <span class="str">"The Java training was great. Trainer was excellent. </span>
 <span class="str">     Rating: 4/5. Name: Navin Kumar."</span>
@@ -875,7 +875,7 @@ result = structured_model.<span class="fn">invoke</span>(
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 10 — LangGraph ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 10 - LangGraph ═══════════════════════════ -->
 <div class="slide" id="slide-10">
   <div class="slide-number">10 / 22</div>
   <div class="section-badge badge-langchain">LangGraph</div>
@@ -894,7 +894,7 @@ result = structured_model.<span class="fn">invoke</span>(
       </table>
       <div class="tip" style="margin-top:16px;">💡 LangGraph is what powers <strong>LangChain Agents</strong> internally. It's the execution engine for the agentic loop.</div>
     </div>
-    <pre><span class="cm"># Chatbot.py — Simplest LangGraph</span>
+    <pre><span class="cm"># Chatbot.py - Simplest LangGraph</span>
 <span class="kw">from</span> langgraph.graph <span class="kw">import</span> START, END, <span class="cls">StateGraph</span>
 <span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">TypedDict</span>, <span class="cls">Annotated</span>
 <span class="kw">from</span> langgraph.graph.message <span class="kw">import</span> add_messages
@@ -923,7 +923,7 @@ response = workflow.<span class="fn">invoke</span>({
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 11 — LangGraph Conditional ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 11 - LangGraph Conditional ═══════════════════════════ -->
 <div class="slide" id="slide-11">
   <div class="slide-number">11 / 22</div>
   <div class="section-badge badge-langchain">LangGraph</div>
@@ -960,7 +960,7 @@ response = workflow.<span class="fn">invoke</span>({
         </div>
       </div>
     </div>
-    <pre><span class="cm"># main.py — Conditional routing</span>
+    <pre><span class="cm"># main.py - Conditional routing</span>
 <span class="kw">from</span> typing <span class="kw">import</span> <span class="cls">Literal</span>
 
 <span class="cm"># ✅ Conditional edge function</span>
@@ -996,7 +996,7 @@ graph.<span class="fn">add_conditional_edges</span>(
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 12 — Tools ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 12 - Tools ═══════════════════════════ -->
 <div class="slide" id="slide-12">
   <div class="slide-number">12 / 22</div>
   <div class="section-badge badge-tools">Tools</div>
@@ -1015,7 +1015,7 @@ graph.<span class="fn">add_conditional_edges</span>(
       </div>
       <div class="warn-box">⚠️ The docstring is CRITICAL. It tells the LLM what the tool does and when to use it. Write clear, specific docstrings!</div>
     </div>
-    <pre><span class="cm"># Task_Manager.py — Tool definitions</span>
+    <pre><span class="cm"># Task_Manager.py - Tool definitions</span>
 <span class="kw">from</span> langchain.tools <span class="kw">import</span> tool
 
 <span class="cm"># ✅ @tool decorator = LLM-callable function</span>
@@ -1045,7 +1045,7 @@ graph.<span class="fn">add_conditional_edges</span>(
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 13 — Tool Agent ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 13 - Tool Agent ═══════════════════════════ -->
 <div class="slide" id="slide-13">
   <div class="slide-number">13 / 22</div>
   <div class="section-badge badge-tools">Tools</div>
@@ -1101,7 +1101,7 @@ graph.<span class="fn">add_edge</span>(<span class="str">"tools"</span>, <span c
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 14 — Human-in-the-Loop ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 14 - Human-in-the-Loop ═══════════════════════════ -->
 <div class="slide" id="slide-14">
   <div class="slide-number">14 / 22</div>
   <div class="section-badge badge-hitl">Human-in-the-Loop</div>
@@ -1141,14 +1141,14 @@ graph.<span class="fn">add_edge</span>(<span class="str">"tools"</span>, <span c
       </div>
     </div>
     <div>
-      <pre><span class="cm"># main.py — interrupt() pauses the graph</span>
+      <pre><span class="cm"># main.py - interrupt() pauses the graph</span>
 <span class="kw">from</span> langgraph.types <span class="kw">import</span> interrupt, <span class="cls">Command</span>
 
 @tool
 <span class="kw">def</span> <span class="fn">Send_Email</span>(email_address: str, body: str):
     <span class="str">"""Send an email. Requires human approval."""</span>
 
-    <span class="cm"># ✅ PAUSE — saves graph state, waits for human</span>
+    <span class="cm"># ✅ PAUSE - saves graph state, waits for human</span>
     decision = <span class="fn">interrupt</span>(<span class="str">"Do you want to send this email?"</span>)
 
     <span class="kw">if</span> decision.<span class="fn">lower</span>() == <span class="str">"yes"</span>:
@@ -1160,20 +1160,20 @@ graph.<span class="fn">add_edge</span>(<span class="str">"tools"</span>, <span c
 <span class="cm"># Checkpointer REQUIRED for interrupt</span>
 app = graph.<span class="fn">compile</span>(checkpointer=<span class="cls">InMemorySaver</span>())
 
-<span class="cm"># 1st run — hits interrupt(), pauses</span>
+<span class="cm"># 1st run - hits interrupt(), pauses</span>
 app.<span class="fn">invoke</span>({"feedback": user_input}, config=config)
 
 <span class="cm"># Human decides</span>
 human_answer = <span class="fn">input</span>(<span class="str">"Approve? (yes/no): "</span>)
 
-<span class="cm"># Resume — graph continues from where it paused</span>
+<span class="cm"># Resume - graph continues from where it paused</span>
 app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human_answer), config=config)</pre>
       <div class="tip" style="margin-top:8px; font-size:0.82rem;">💡 The graph state is <strong>saved to the checkpointer</strong> when interrupt() fires. The same <code>thread_id</code> resumes from exactly where it stopped.</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 15 — Single Agent ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 15 - Single Agent ═══════════════════════════ -->
 <div class="slide" id="slide-15">
   <div class="slide-number">15 / 22</div>
   <div class="section-badge badge-multiagent">Single Agent</div>
@@ -1203,7 +1203,7 @@ app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human
         <tr><td>Examples</td><td>Task Manager, Weather Bot</td></tr>
       </table>
     </div>
-    <pre><span class="cm"># Single Agent — Task Manager (Task_Manager.py)</span>
+    <pre><span class="cm"># Single Agent - Task Manager (Task_Manager.py)</span>
 <span class="kw">from</span> langchain.agents <span class="kw">import</span> create_agent
 
 agent = <span class="fn">create_agent</span>(
@@ -1236,7 +1236,7 @@ response = agent.<span class="fn">invoke</span>(
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 16 — Multi-Agent ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 16 - Multi-Agent ═══════════════════════════ -->
 <div class="slide" id="slide-16">
   <div class="slide-number">16 / 22</div>
   <div class="section-badge badge-multiagent">Multi-Agent</div>
@@ -1278,21 +1278,12 @@ response = agent.<span class="fn">invoke</span>(
         <tr><td>Best for</td><td>CRUD, Q&A</td><td>Research, build, review</td></tr>
         <tr><td>Frameworks</td><td>LangChain Agent</td><td>LangGraph</td></tr>
       </table>
-      <div class="card">
-        <h3>Real example in code:</h3>
-        <p style="font-size:0.85rem; color:var(--muted); margin:8px 0;">
-          <strong style="color:#fff;">demo8_multi_agent.py</strong><br>
-          → <span style="color:var(--orange);">Research Agent</span> gathers info<br>
-          → <span style="color:var(--blue);">Writer Agent</span> writes the output<br>
-          → Both agents share state through LangGraph
-        </p>
-      </div>
     </div>
   </div>
 </div>
 
 
-<!-- ═══════════════════════════ SLIDE 17 — RAG ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 17 - RAG ═══════════════════════════ -->
 <div class="slide" id="slide-17">
   <div class="slide-number">17 / 22</div>
   <div class="section-badge badge-rag">Bonus: RAG</div>
@@ -1357,7 +1348,7 @@ answer = rag_chain.<span class="fn">invoke</span>(<span class="str">"What is the
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 18 — Best Practices ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 18 - Best Practices ═══════════════════════════ -->
 <div class="slide" id="slide-18">
   <div class="slide-number">18 / 22</div>
   <h2>Dos and Don'ts When Building Agents</h2>
@@ -1408,7 +1399,7 @@ answer = rag_chain.<span class="fn">invoke</span>(<span class="str">"What is the
   <div class="tip" style="margin-top:16px;">💡 Start simple: one agent + two tools. Get it working first, then add complexity only when you need it.</div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 20 — Framework Comparison ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 20 - Framework Comparison ═══════════════════════════ -->
 <div class="slide" id="slide-19">
   <div class="slide-number">19 / 22</div>
   <h2>Framework Comparison</h2>
@@ -1458,7 +1449,7 @@ answer = rag_chain.<span class="fn">invoke</span>(<span class="str">"What is the
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 21 — Cheat Sheet ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 21 - Cheat Sheet ═══════════════════════════ -->
 <div class="slide" id="slide-20">
   <div class="slide-number">20 / 22</div>
   <h2>Quick Reference Cheat Sheet</h2>
@@ -1522,7 +1513,7 @@ app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human
   </div>
 </div>
 
-<!-- ═══════════════════════════ SLIDE 21 — Summary ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 21 - Summary ═══════════════════════════ -->
 <div class="slide" id="slide-21">
   <div class="slide-number">21 / 22</div>
   <h2>Session Summary</h2>
@@ -1556,7 +1547,7 @@ app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human
     <div class="card" style="border: 1px solid var(--primary); max-width:560px; flex:1; text-align:center;">
       <h3 style="margin-bottom:14px;">What to try next</h3>
       <ul class="check-list" style="font-size:0.95rem; line-height:2.2; display:inline-block; text-align:left;">
-        <li>Get a Gemini API key and run demo1</li>
+        <li>Get Gemini API key and run the code which we had disscussed</li>
         <li>Build a tool-based agent for a real use case</li>
         <li>Add HITL to any agent that modifies data</li>
         <li>Integrate RAG with own documents</li>
@@ -1566,7 +1557,7 @@ app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human
 </div>
 
 
-<!-- ═══════════════════════════ SLIDE 22 — Q&A + Thank You ═══════════════════════════ -->
+<!-- ═══════════════════════════ SLIDE 22 - Q&A + Thank You ═══════════════════════════ -->
 <div class="slide title-slide" id="slide-22">
   <div class="slide-number">22 / 22</div>
   <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; width:100%; text-align:center; gap:24px;">
@@ -1574,7 +1565,7 @@ app.<span class="fn">invoke</span>(<span class="cls">Command</span>(resume=human
     <p style="font-size:1.25rem; color:var(--muted);">Got questions? Let's discuss!</p>
     <div class="title-accent" style="margin:0 auto;"></div>
     <h1 style="font-size:3.2rem; margin:0; padding-bottom:0.15em;">Thank You!</h1>
-    <p style="font-size:1.1rem; color:var(--muted); max-width:520px; line-height:1.8;">It was great having you in this session. Keep building, keep experimenting — and reach out any time.</p>
+    <p style="font-size:1.1rem; color:var(--muted); max-width:520px; line-height:1.8;">It was great having you in this session. Keep building, keep experimenting - and reach out any time.</p>
   </div>
 </div>
 
